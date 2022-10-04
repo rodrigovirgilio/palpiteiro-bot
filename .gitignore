@@ -1,3 +1,10 @@
+# Serverless
+node_modules
+package-lock.json
+package.json
+.serverless/
+*.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
