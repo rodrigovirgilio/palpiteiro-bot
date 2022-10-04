@@ -1,0 +1,44 @@
+name: Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    environment: ${{ github.BASE_REF }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - cartola_bot
+          - cartola_budget
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+
+      - name: Install requirements
+        run: |
+          pip install --upgrade pip wheel
+          pip install pytest-cov
+          if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        working-directory: ${{ matrix.path }}
+
+      - name: Test
+        run: pytest ${{ matrix.path }} --cov=./ --cov-report=xml --log-cli-level=INFO
+        env:
+          GLBID: ${{ secrets.GLBID }}
+
+      - name: Code coverage
+        uses: codecov/codecov-action@v3

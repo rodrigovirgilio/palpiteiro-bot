@@ -1,0 +1,109 @@
+service: palpiteiro-bot
+frameworkVersion: "3"
+
+params:
+  main:
+    cartola-bot-schedule-enabled: true
+  dev:
+    cartola-bot-schedule-enabled: false
+
+custom:
+  account: "#{AWS::AccountId}"
+
+provider:
+  name: aws
+  stage: ${opt:stage}
+  region: us-east-1
+  deploymentBucket: palpiteiro-${opt:stage}
+
+package:
+  individually: true
+  patterns:
+    - "!**/*"
+    - "utils/**/*.py"
+
+functions:
+  cartola-budget:
+    handler: cartola_budget.handler
+    description: Bot for getting available budget for my Cartola team.
+    runtime: python3.9
+    memorySize: 128 # megabytes
+    package:
+      patterns:
+        - "cartola_budget/*.py"
+    environment:
+      GLBID: ${env:GLBID}
+
+  cartola-bot:
+    handler: cartola_bot.handler
+    description: Bot for submitting Cartola line up.
+    runtime: python3.9
+    memorySize: 128 # megabytes
+    package:
+      patterns:
+        - "cartola_bot/*.py"
+    environment:
+      GLBID: ${env:GLBID}
+
+stepFunctions:
+  stateMachines:
+    palpiteiro-cartola-bot:
+      name: ${self:service}-cartola-bot-${opt:stage}
+      role: arn:aws:iam::${aws:accountId}:role/palpiteiro-step-functions
+      events:
+        - schedule:
+            rate: cron(15 * * * ? *)
+            enabled: ${param:cartola-bot-schedule-enabled}
+      definition:
+        Comment: Line-up bot for Cartola
+        StartAt: Budget
+        States:
+          Budget:
+            Type: Task
+            Next: Draft
+            Resource: arn:aws:states:::lambda:invoke
+            Parameters:
+              FunctionName:
+                Fn::GetAtt: [cartola-budget, Arn]
+          Draft:
+            Type: Task
+            Next: Submit
+            Parameters:
+              StateMachineArn: arn:aws:states:${self:provider.region}:${aws:accountId}:stateMachine:palpiteiro-draft-${opt:stage}
+              Input:
+                game: cartola
+                scheme:
+                  goalkeeper: 1
+                  fullback: 2
+                  defender: 2
+                  midfielder: 3
+                  forward: 3
+                  coach: 1
+                price.$: $.Payload.budget
+                max_players_per_club: 5
+                bench: true
+                dropout: 0.0
+                date: null
+            Resource: arn:aws:states:::aws-sdk:sfn:startSyncExecution
+          Submit:
+            Type: Task
+            End: true
+            Resource: arn:aws:states:::lambda:invoke
+            Parameters:
+              FunctionName:
+                Fn::GetAtt: [cartola-bot, Arn]
+              Payload.$: $
+            InputPath: $.Output
+
+resources:
+  Resources:
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}-${opt:stage}
+        Subscription:
+          - Protocol: email
+            Endpoint: matheusccouto@gmail.com
+
+plugins:
+  - serverless-step-functions
