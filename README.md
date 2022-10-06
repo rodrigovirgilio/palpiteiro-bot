@@ -1,5 +1,8 @@
 # :soccer: Palpiteiro Bot
-Automatically submit line ups to Cartola using Palpiteiro Draft API.
+Automatically submit line ups to Cartola.
+
+[![Deploy](https://github.com/matheusccouto/palpiteiro-bot/actions/workflows/deploy.yml/badge.svg)](https://github.com/matheusccouto/palpiteiro-bot/actions/workflows/deploy.yml)
+[![codecov](https://codecov.io/github/matheusccouto/palpiteiro-bot/branch/main/graph/badge.svg?token=dlm1tXHh3K)](https://codecov.io/github/matheusccouto/palpiteiro-bot)
 
 ## Architecture
 ![aws](https://img.shields.io/badge/Amazon_AWS-FF9900?logo=amazonaws&logoColor=white)
