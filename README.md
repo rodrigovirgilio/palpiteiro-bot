@@ -1,4 +1,4 @@
-# Palpiteiro Bot
+# :soccer: Palpiteiro Bot
 Automatically submit line ups to Cartola.
 
 [![Deploy](https://github.com/matheusccouto/palpiteiro-bot/actions/workflows/deploy.yml/badge.svg)](https://github.com/matheusccouto/palpiteiro-bot/actions/workflows/deploy.yml)
