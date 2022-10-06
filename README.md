@@ -1,4 +1,4 @@
-# Palpiteiro Bot
+# :soccer: Palpiteiro Bot
 Automatically submit line ups to Cartola using Palpiteiro Draft API.
 
 ## Architecture
