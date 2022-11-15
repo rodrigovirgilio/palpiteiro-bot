@@ -3,7 +3,7 @@ frameworkVersion: "3"
 
 params:
   main:
-    cartola-bot-schedule-enabled: true
+    cartola-bot-schedule-enabled: false
   dev:
     cartola-bot-schedule-enabled: false
 
