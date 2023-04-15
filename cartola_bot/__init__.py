@@ -24,8 +24,11 @@ def handler(event, context=None):  # pylint: disable=unused-argument
         "capitao": max(event["players"], key=lambda p: p["points"])["id"],
         "reservas": {POSITION[p["position"]]: p["id"] for p in event["bench"]},
     }
-    return utils.http.post(
+    res = utils.http.post(
         "https://api.cartola.globo.com/auth/time/salvar",
         body=body,
         headers=HEADERS,
     )
+    if "problema" in res["mensagem"]:
+        raise ValueError(res["mensagem"])
+    return res
